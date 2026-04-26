@@ -13,7 +13,6 @@ resource "azurerm_subnet" "domain" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
-  network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
 # Windows workstations
@@ -23,7 +22,6 @@ resource "azurerm_subnet" "workstation" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
-  network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
 # Kali-Linux
@@ -33,7 +31,6 @@ resource "azurerm_subnet" "attacker" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.3.0/24"]
-  network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
 # Wazuh
@@ -43,5 +40,4 @@ resource "azurerm_subnet" "monitoring" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.4.0/24"]
-  network_security_group_id = azurerm_network_security_group.nsg.id
 }
