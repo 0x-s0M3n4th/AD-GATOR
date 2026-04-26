@@ -9,5 +9,13 @@ variable "location" {
 }
 variable "my_ip" {
   description = "My public IP in CIDR format"
-  type = string
+  type        = string
+}
+variable "admin_username" {
+  default = "azureuser"
+}
+
+variable "admin_password" {
+  description = "Windows admin password"
+  sensitive   = true
 }
