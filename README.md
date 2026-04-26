@@ -121,7 +121,7 @@ Detailed steps are documented inside the `/docs` directory.
 ## Project Status
 
 * [x] Project Initialization
-* [ ] Network Infrastructure
+* [x] Network Infrastructure
 * [ ] Domain Controller Deployment
 * [ ] Domain Join (Workstation)
 * [ ] Attack Simulation
