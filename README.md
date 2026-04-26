@@ -122,7 +122,8 @@ Detailed steps are documented inside the `/docs` directory.
 
 * [x] Project Initialization
 * [x] Network Infrastructure
-* [ ] Domain Controller Deployment
+* [x] Domain Controller Deployment
+* [ ] Active Directory Deployment
 * [ ] Domain Join (Workstation)
 * [ ] Attack Simulation
 * [ ] Monitoring & Detection
