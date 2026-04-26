@@ -7,3 +7,7 @@ variable "location" {
   description = "Azure region"
   default     = "Central India"
 }
+variable "my_ip" {
+  description = "My public IP in CIDR format"
+  type = string
+}
