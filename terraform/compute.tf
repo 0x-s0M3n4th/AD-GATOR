@@ -47,3 +47,35 @@ resource "azurerm_windows_virtual_machine" "dc" {
     version   = "latest"
   }
 }
+
+# Domain controller configuration 
+resource "azurerm_virtual_machine_extension" "dc_bootstrap" {
+  name                 = "dc-bootstrap"
+  virtual_machine_id   = azurerm_windows_virtual_machine.dc.id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.10"
+
+  depends_on = [
+    azurerm_windows_virtual_machine.dc
+  ]
+
+  settings = jsonencode({
+     fileUris = [
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/bootstrap.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/promote-dc.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/post-config.ps1",
+
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/ou-structure.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/move-objects.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/users.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/groups.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/memberships.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/service-accounts.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/adcs.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/shares.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/gpo.ps1"
+],
+   commandToExecute = "powershell -ExecutionPolicy Bypass -File bootstrap.ps1"
+  })
+}
