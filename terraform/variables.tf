@@ -19,3 +19,12 @@ variable "admin_password" {
   description = "Windows admin password"
   sensitive   = true
 }
+
+# variables for Windows workstation
+variable "ws_name" {
+  default = "ad-gator-ws"
+}
+
+variable "ws_size" {
+  default = "Standard_B2s"
+}

@@ -1,4 +1,4 @@
-# Domain controller Publi IP
+# Domain controller Public IP
 resource "azurerm_public_ip" "dc_pip" {
   name                = "dc-public-ip"
   location            = var.location
@@ -74,7 +74,60 @@ resource "azurerm_virtual_machine_extension" "dc_bootstrap" {
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/adcs.ps1",
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/shares.ps1",
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/gpo.ps1"
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/domain-join.ps1"
 ],
    commandToExecute = "powershell -ExecutionPolicy Bypass -File bootstrap.ps1"
   })
+}
+
+# Windows workstation public ip configuration:
+resource "azurerm_public_ip" "ws_pip" {
+  name                = "${var.ws_name}-pip"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  allocation_method   = "Dynamic"
+}
+
+# NIC creation for windows workstaions -> Private IP allocation, allocating DC as DNS Windows-server
+resource "azurerm_network_interface" "ws_nic" {
+  name                = "${var.ws_name}-nic"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.workstation.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.0.2.10"
+    public_ip_address_id          = azurerm_public_ip.ws_pip.id
+  }
+
+  dns_servers = ["10.0.1.10"] # DC private IP
+}
+
+# Creating the windows 10 vm 
+resource "azurerm_windows_virtual_machine" "ws" {
+  name                = var.ws_name
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  size                = var.ws_size
+
+  admin_username = var.admin_username
+  admin_password = var.admin_password
+
+  network_interface_ids = [
+    azurerm_network_interface.ws_nic.id
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsDesktop"
+    offer     = "windows-10"
+    sku       = "win10-22h2-pro"
+    version   = "latest"
+  }
 }
