@@ -1,25 +1,13 @@
-Install-WindowsFeature GPMC -IncludeManagementTools
 Import-Module GroupPolicy
 
-$root = "DC=kurukshetra,DC=local"
+# Create GPOs
+$gpo1 = New-GPO -Name "Kurukshetra-Lab-RelaxedSecurity" -ErrorAction SilentlyContinue
+$gpo2 = New-GPO -Name "Hastinapur-SecureBaseline" -ErrorAction SilentlyContinue
+$gpo3 = New-GPO -Name "Indraprastha-WorkstationPolicy" -ErrorAction SilentlyContinue
 
-function Create-GPO-Link {
-    param($name, $target)
+# Link GPOs directly (no Get-GPLink check needed)
+New-GPLink -Name "Kurukshetra-Lab-RelaxedSecurity" -Target "DC=kurukshetra,DC=local" -Enforced Yes -ErrorAction SilentlyContinue
 
-    if (-not (Get-GPO -Name $name -ErrorAction SilentlyContinue)) {
-        New-GPO -Name $name
-    }
+New-GPLink -Name "Hastinapur-SecureBaseline" -Target "OU=Hastinapur,DC=kurukshetra,DC=local" -ErrorAction SilentlyContinue
 
-    if (-not (Get-GPLink -Target $target | Where-Object {$_.DisplayName -eq $name})) {
-        New-GPLink -Name $name -Target $target
-    }
-}
-
-# Kurukshetra (Attack Zone)
-Create-GPO-Link "Kurukshetra-Lab-RelaxedSecurity" "OU=Kurukshetra,$root"
-
-# Hastinapur (Secure Core)
-Create-GPO-Link "Hastinapur-SecureBaseline" "OU=Hastinapur,$root"
-
-# Indraprastha (Workstations)
-Create-GPO-Link "Indraprastha-WorkstationPolicy" "OU=Indraprastha,$root"
+New-GPLink -Name "Indraprastha-WorkstationPolicy" -Target "OU=Indraprastha,DC=kurukshetra,DC=local" -ErrorAction SilentlyContinue
