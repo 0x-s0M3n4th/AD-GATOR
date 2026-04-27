@@ -7,12 +7,6 @@ $source = Split-Path -Parent $MyInvocation.MyCommand.Definition
 # Copy EVERYTHING including modules
 Copy-Item -Path "$source\*" -Destination $base -Recurse -Force
 
-# Verify modules exist
-if (!(Test-Path "C:\ADSetup\modules")) {
-    Write-Output "Modules folder missing! Exiting..."
-    exit 1
-}
-
 # Register scheduled task for post-config
 $action = New-ScheduledTaskAction `
     -Execute "powershell.exe" `
