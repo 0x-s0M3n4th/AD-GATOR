@@ -65,15 +65,15 @@ resource "azurerm_virtual_machine_extension" "dc_bootstrap" {
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/promote-dc.ps1",
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/post-config.ps1",
 
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/ou-structure.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/move-objects.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/users.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/groups.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/memberships.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/service-accounts.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/adcs.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/shares.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/modules/gpo.ps1"
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/ou-structure.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/move-objects.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/users.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/groups.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/memberships.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/service-accounts.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/adcs.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/shares.ps1",
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/gpo.ps1"
 ],
    commandToExecute = "powershell -ExecutionPolicy Bypass -File bootstrap.ps1"
   })
