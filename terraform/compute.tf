@@ -55,7 +55,6 @@ resource "azurerm_virtual_machine_extension" "dc_bootstrap" {
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
   type_handler_version = "1.10"
-}
   depends_on = [
     azurerm_windows_virtual_machine.dc
   ]
