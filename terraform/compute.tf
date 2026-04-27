@@ -85,7 +85,8 @@ resource "azurerm_public_ip" "ws_pip" {
   name                = "${var.ws_name}-pip"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 # NIC creation for windows workstaions -> Private IP allocation, allocating DC as DNS Windows-server
