@@ -1,3 +1,4 @@
+Install-WindowsFeature GPMC -IncludeManagementTools
 Import-Module GroupPolicy
 
 $root = "DC=kurukshetra,DC=local"

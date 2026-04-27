@@ -6,9 +6,9 @@ if (-not (Get-ADUser -Filter {SamAccountName -eq "SQLService"})) {
     New-ADUser `
     -Name "SQLService" `
     -SamAccountName "SQLService" `
-    -AccountPassword (ConvertTo-SecureString "SqlService@123" -AsPlainText -Force) `
+    -AccountPassword (ConvertTo-SecureString "MYpassword123#" -AsPlainText -Force) `
     -Enabled $true `
-    -Description "SQL Service Account Password: SqlService@123" `
+    -Description "SQL Service Account Password: MYpassword123#" `
     -PasswordNeverExpires $true
 
 }

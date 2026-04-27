@@ -3,7 +3,7 @@ Import-Module ActiveDirectory
 $root = "DC=kurukshetra,DC=local"
 
 # Move DC
-Get-ADComputer "DC-BHISHMA" -ErrorAction SilentlyContinue | 
+Get-ADComputer "ad-gator-dc" -ErrorAction SilentlyContinue | 
 Move-ADObject -TargetPath "OU=DomainControllers,OU=Hastinapur,$root"
 
 # Move Users
