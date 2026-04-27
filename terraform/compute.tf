@@ -73,7 +73,7 @@ resource "azurerm_virtual_machine_extension" "dc_bootstrap" {
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/service-accounts.ps1",
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/adcs.ps1",
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/shares.ps1",
-  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/gpo.ps1"
+  "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/gpo.ps1",
   "https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/domain-join.ps1"
 ],
    commandToExecute = "powershell -ExecutionPolicy Bypass -File bootstrap.ps1"
