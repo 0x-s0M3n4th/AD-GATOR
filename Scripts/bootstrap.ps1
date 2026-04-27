@@ -1,11 +1,19 @@
 $base = "C:\ADSetup"
 New-Item -ItemType Directory -Path $base -Force
 
-# Copy all scripts from current execution directory to C:\ADSetup
+# Get current script directory (Azure temp location)
 $source = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Copy EVERYTHING including modules
 Copy-Item -Path "$source\*" -Destination $base -Recurse -Force
 
-# Register scheduled task
+# Verify modules exist
+if (!(Test-Path "C:\ADSetup\modules")) {
+    Write-Output "Modules folder missing! Exiting..."
+    exit 1
+}
+
+# Register scheduled task for post-config
 $action = New-ScheduledTaskAction `
     -Execute "powershell.exe" `
     -Argument "-ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1"
