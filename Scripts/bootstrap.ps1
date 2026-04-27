@@ -1,8 +1,11 @@
-# Create working directory
 $base = "C:\ADSetup"
 New-Item -ItemType Directory -Path $base -Force
 
-# Register scheduled task for post-config
+# Copy all scripts from current execution directory to C:\ADSetup
+$source = Split-Path -Parent $MyInvocation.MyCommand.Definition
+Copy-Item -Path "$source\*" -Destination $base -Recurse -Force
+
+# Register scheduled task
 $action = New-ScheduledTaskAction `
     -Execute "powershell.exe" `
     -Argument "-ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1"
