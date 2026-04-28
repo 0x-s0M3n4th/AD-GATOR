@@ -101,6 +101,7 @@ cd AD-GATOR
 ```bash
 curl ifconfig.me
 ```
+_Or go to `https://whatismyipaddress.com/` to see your IPV4 address_
 
 ---
 
@@ -138,6 +139,7 @@ kali_ssh_public_key = "YOUR_PUBLIC_KEY"
 cd terraform
 
 terraform init
+terraform validate
 terraform plan
 terraform apply
 ```
