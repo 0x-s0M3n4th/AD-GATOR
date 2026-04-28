@@ -17,6 +17,8 @@ The project simulates a real-world enterprise environment where:
 
 ---
 
+**If you want to directly start without any BS go here [quick-start](https://github.com/0x-s0M3n4th/AD-GATOR/blob/main/Quick-start.md)**
+
 ## Objectives
 
 * Automate infrastructure deployment using Terraform
