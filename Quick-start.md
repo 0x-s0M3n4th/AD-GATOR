@@ -1,94 +1,93 @@
 # Quick Start Guide – AD-GATOR Lab Deployment
 
-## Prerequisites
+Welcome to the AD-GATOR deployment guide! Follow these steps chronologically to build your Active Directory lab in Azure.
 
-1. Install Terraform -> arch linux installation
-```bash
-sudo pacman -S terraform
-# verification
-terraform -V
-```
-_Windows installation_
+---
+
+## Phase 1: Install Prerequisites
+
+### Option A: Windows (PowerShell)
+
 ```powershell
+# Install Terraform
 winget install HashiCorp.Terraform
-# verification 
 terraform -version
-```
-_Debain installation_
-```bash
-# step 1
-sudo apt update && sudo apt install -y gnupg software-properties-common curl
 
-# Step 2: Download the HashiCorp GPG key to the trusted keyrings directory
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-
-# Step 3: Add the official HashiCorp repository (referencing the key from Step 2)
-echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-
-# step 4
-sudo apt update
-
-# step 5
-sudo apt install terraform -y
-```
-
-
-2. Install Azure CLI -> Arch linux installation
-```bash
-sudo pacman -S azure-cli
-# verification
-az version
-```
-_Windows installation_
-```powershell
+# Install Azure CLI
 winget install Microsoft.AzureCLI
-# verification
 az version
 ```
-_Debian installation_
+
+---
+
+### Option B: Debian / Ubuntu
+
 ```bash
+# Install Terraform
+sudo apt update && sudo apt install -y gnupg software-properties-common curl
+curl -fsSL https://apt.releases.hashicorp.com/gpg | \
+gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+sudo apt update
+sudo apt install terraform -y
+
+# Install Azure CLI
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+# Verify
+terraform -version
 az version
 ```
 
-3. Have an active Azure subscription
+---
 
-## 1. Authenticate with Azure
+### Option C: Arch Linux
 
-Login to your Azure account:
+```bash
+sudo pacman -Syu terraform azure-cli
+terraform -version
+az version
+```
+
+---
+
+## Phase 2: Azure Authentication & Preparation
 
 ```bash
 az login
-```
-
-Verify the active subscription:
-
-```bash
 az account show
 ```
 
 ---
 
-_When i was testing in windows, i faced issues like marketplace issue, linux users may also face the same issues like `Microsoft.Compute not registered` and `Auto provider registration disabled`, fix them before hand to not face the errors:
+### Fix Provider Registration Errors (if needed)
+
 ```bash
-
-# step 1:
-az vm image terms accept \
-  --publisher kali-linux \
-  --offer kali \
-  --plan kali-2026-1
-
-
-# step 2:
 az provider register --namespace Microsoft.Compute
 az provider register --namespace Microsoft.Network
 az provider register --namespace Microsoft.Storage
 
-# step 3 : verification
 az provider show --namespace Microsoft.Compute --query "registrationState"
 ```
 
-## 2. Clone the Repository
+---
+
+### Accept Kali Marketplace Terms (REQUIRED)
+
+```bash
+az vm image terms accept \
+  --publisher kali-linux \
+  --offer kali \
+  --plan kali-2026-1
+```
+
+---
+
+## Phase 3: Configuration & Keys
 
 ```bash
 git clone https://github.com/0x-s0M3n4th/AD-GATOR.git
@@ -97,93 +96,59 @@ cd AD-GATOR
 
 ---
 
-_Before hand perform this commands to get your public ip:_
+### Get Your Public IP
+
 ```bash
 curl ifconfig.me
-# copy the ipv4 value, make sure you are connected to a wifi, not mobile hotspot
 ```
-_Other way to check is that -> go to `what is my ip.com` -> copy the IPV4 value from there._
-
-## 3. Configure Variables
-
-Create the `terraform.tfvars` file inside `/terraform` folder and provide:
-
-```text
-- admin_password = "YOUR_PREFERRED_PASSWORD"
-- my_ip = "YOUR_PUBLIC_IP"
-- kali_ssh_public_key = "PUBLIC_KEY_VALUE"
-```
-
 
 ---
 
-## 4. Generate SSH Key (for Kali)
+### Generate SSH Keys
 
-On your local machine:
+#### Linux / Mac
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/kali_azure
+cat ~/.ssh/kali_azure.pub
+```
 
-# for windows users:
+#### Windows (PowerShell)
+
+```powershell
 ssh-keygen -t ed25519 -f C:\Users\$env:USERNAME\.ssh\kali_azure
-```
-
-Copy the public key:
-
-```bash
-cat C:\Users\$env:USERNAME\.ssh\kali_azure.pub
-```
-
-Paste it into:
-
-```text
-terraform.tfvars → kali_ssh_public_key = ""
+type C:\Users\$env:USERNAME\.ssh\kali_azure.pub
 ```
 
 ---
 
-## 5. Initialize Terraform
+### Create terraform.tfvars
+
+```hcl
+admin_password = "YOUR_PASSWORD"
+my_ip = "YOUR_PUBLIC_IP"
+kali_ssh_public_key = "YOUR_PUBLIC_KEY"
+```
+
+---
+
+## Phase 4: Deploy Infrastructure
 
 ```bash
+cd terraform
+
 terraform init
-```
-
----
-
-## 6. Plan Deployment
-
-```bash
 terraform plan
-```
-
----
-
-## 7. Apply Infrastructure
-
-```bash
 terraform apply
 ```
 
----
-
-## 8. Wait for Provisioning
-
-Important:
-
-```text
-Wait ~5–10 minutes after apply completes
-```
-
-Reason:
-
-* AD DS installation runs via VM extension
-* Domain setup is asynchronous
+Wait **5–10 minutes** after apply completes.
 
 ---
 
-## 9. Verify Domain Controller
+## Phase 5: Active Directory Setup
 
-Run:
+### Verify Domain Controller
 
 ```bash
 az vm run-command invoke \
@@ -192,13 +157,10 @@ az vm run-command invoke \
   --command-id RunPowerShellScript \
   --scripts "systeminfo | findstr /B /C:\"Domain\""
 ```
-Expected:
 
-```text
-Domain: kurukshetra.local
-```
+---
 
-Run the post-config.ps1 for the GPO,OU,Users,groups etc setup:
+### Run AD Configuration
 
 ```bash
 az vm run-command invoke \
@@ -208,28 +170,9 @@ az vm run-command invoke \
   --scripts "powershell -ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1"
 ```
 
+---
 
-_Verification_
-
-```bash
-az vm run-command invoke \
-  --resource-group ad-gator-rg \
-  --name ad-gator-dc \
-  --command-id RunPowerShellScript \
-  --scripts '
-  systeminfo | findstr /B /C:"Domain"
-  Get-Service NTDS,certsvc
-  Import-Module ActiveDirectory
-  Get-ADUser -Filter * | Select Name
-  Get-ADOrganizationalUnit -Filter * | Select Name
-  Get-ADGroupMember "Domain Admins"
-  Get-SmbShare
-  Get-GPO -All
-  '
-```
-## 10. Domain Join Workstation
-
-Execute via Azure CLI:
+### Join Workstation to Domain
 
 ```bash
 az vm run-command invoke \
@@ -243,7 +186,9 @@ az vm run-command invoke \
   '
 ```
 
-Then restart:
+---
+
+### Restart Workstation
 
 ```bash
 az vm restart --resource-group ad-gator-rg --name ad-gator-ws
@@ -251,109 +196,23 @@ az vm restart --resource-group ad-gator-rg --name ad-gator-ws
 
 ---
 
-## 11. Verify Domain Join
+## Phase 6: Kali Attacker Machine Setup
+
+### Connect via SSH
 
 ```bash
-az vm run-command invoke \
-  --resource-group ad-gator-rg \
-  --name ad-gator-ws \
-  --command-id RunPowerShellScript \
-  --scripts "systeminfo | findstr /B /C:\"Domain\""
+ssh -i ~/.ssh/kali_azure kali@<KALI_PUBLIC_IP>
 ```
 
-Expected:
-
-```text
-Domain: kurukshetra.local
-```
-
----
-
-**IF YOU WANT TO VERIFY VIA GUI ACCESS THAT YOUR DOMAIN CONTROLLER AND WORKSTATION IS ALIVE OR NOT:**
-_Check the IPs beforehand_
-
-```bash
-az vm list-ip-addresses \
-  --resource-group ad-gator-rg \
-  --output table
-```
-
-```bash
-# Install xfrerdp3
-# For arch linux:
-sudo pacman -S freerdp
-
-# RDP into DC
-xfreerdp3 /v:<DC_PUBLIC_IP> \
-  /u:KURUKSHETRA\\krishna \
-  /p:'Password@123' \
-  /cert:ignore \
-  /dynamic-resolution
-
-# RDP into workstation
-xfreerdp3 /v:<WS_PUBLIC_IP> \
-  /u:KURUKSHETRA\\krishna \
-  /p:'Password@123' \
-  /cert:ignore \
-  /dynamic-resolution  
-
-# For debian - ubuntu/kali etc
-sudo apt update
-sudo apt install -y freerdp3-x11
-
-# RDP into DC
-xfreerdp3 /v:<DC_PUBLIC_IP> \
-  /u:KURUKSHETRA\\krishna \
-  /p:'Password@123' \
-  /cert:ignore \
-  /dynamic-resolution
-# RDP into workstation
-  xfreerdp3 /v:<WS_PUBLIC_IP> \
-  /u:KURUKSHETRA\\krishna \
-  /p:'Password@123' \
-  /cert:ignore \
-  /dynamic-resolution
-
-
-```
-
-_Windows installation of wfreerdp.exe_
+Windows:
 
 ```powershell
-winget install FreeRDP.FreeRDP
-
-wfreerdp /version
-
-# RDP into DC
-wfreerdp /v:<DC_PUBLIC_IP> `
-  /u:KURUKSHETRA\krishna `
-  /p:Password@123 `
-  /cert:ignore `
-  /dynamic-resolution
-
-# RDP into workstation
-wfreerdp /v:<WS_PUBLIC_IP> `
-  /u:KURUKSHETRA\krishna `
-  /p:Password@123 `
-  /cert:ignore `
-  /dynamic-resolution
-```
-
-
-## 12. Connect to Kali Machine
-
-```bash
-ssh -i ~/.ssh/kali_azure kali@<public-ip>
-
-# for windows users:
 ssh -i C:\Users\$env:USERNAME\.ssh\kali_azure kali@<KALI_PUBLIC_IP>
 ```
 
 ---
 
-## 13. Fix Kali Environment (First Login Only) -> paste the commands don't type them manually
-
-Run:
+### Fix Kali Environment (First Login)
 
 ```bash
 cp /etc/skel/.zshrc ~/.zshrc
@@ -364,12 +223,7 @@ echo 'source ~/.zshrc' > ~/.zprofile
 
 ---
 
-# Add kali market place error solution
-
-
-## 14. Install Attacker Toolset
-
-Download and run your setup script -> inside the kali vm:
+### Install Tools
 
 ```bash
 wget https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/kali.sh
@@ -379,7 +233,7 @@ chmod +x kali.sh
 
 ---
 
-## 15. Verify Tools
+### Verify Tools
 
 ```bash
 nmap --version
@@ -390,11 +244,52 @@ bloodhound-python -h
 
 ---
 
+## Phase 7: Optional RDP Verification
+
+### Get VM IPs
+
+```bash
+az vm list-ip-addresses --resource-group ad-gator-rg -o table
+```
+
+---
+
+### Windows (wfreerdp)
+
+```powershell
+winget install FreeRDP.FreeRDP
+
+wfreerdp /v:<DC_IP> /u:KURUKSHETRA\krishna /p:Password@123 /cert:ignore
+wfreerdp /v:<WS_IP> /u:KURUKSHETRA\krishna /p:Password@123 /cert:ignore
+```
+
+---
+
+### Debian / Ubuntu
+
+```bash
+sudo apt install freerdp2-x11 -y
+
+xfreerdp /v:<DC_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
+xfreerdp /v:<WS_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
+```
+
+---
+
+### Arch Linux
+
+```bash
+sudo pacman -S freerdp
+
+xfreerdp /v:<DC_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
+xfreerdp /v:<WS_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
+```
+
+---
+
 ## Final State
 
-After completing all steps:
-
-```text
+```
 ✔ Domain Controller deployed
 ✔ Active Directory configured
 ✔ Workstation domain joined
@@ -404,13 +299,8 @@ After completing all steps:
 
 ---
 
-## Notes
+## Important Notes
 
-* DNS must always point to Domain Controller (`10.0.1.10`)
-* Use domain users (e.g., krishna) for authentication, not azureuser
-* Kali is CLI-based; GUI tools should be run locally
-
----
-
-End of Quick Start Guide
-
+- DNS must point to Domain Controller (10.0.1.10)
+- Use domain users (krishna), not azureuser
+- Kali is CLI-based; GUI tools should run locally
