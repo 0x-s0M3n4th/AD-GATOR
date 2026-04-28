@@ -4,7 +4,7 @@
 
 1. Install Terraform
 ```bash
-suco pacman -S terraform
+sudo pacman -S terraform
 # verification
 terraform -V
 ```
@@ -19,15 +19,11 @@ _Debain installation_
 # step 1
 sudo apt update && sudo apt install -y gnupg software-properties-common curl
 
-# step 2
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+# Step 2: Download the HashiCorp GPG key to the trusted keyrings directory
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
-# if apt-key fails
-curl -fsSL https://apt.releases.hashicorp.com/gpg | \
-gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
-
-# step 3
-sudo apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+# Step 3: Add the official HashiCorp repository (referencing the key from Step 2)
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 
 # step 4
 sudo apt update
