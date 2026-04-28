@@ -343,7 +343,7 @@ echo 'source ~/.zshrc' > ~/.zprofile
 Download and run your setup script -> inside the kali vm:
 
 ```bash
-wget https://raw.githubusercontent.com/AD-GATOR/main/Scripts/kali.sh
+wget https://raw.githubusercontent.com/0x-s0M3n4th/AD-GATOR/main/Scripts/kali.sh
 chmod +x kali.sh
 ./kali.sh
 ```
