@@ -64,27 +64,6 @@ Security is enforced using:
 
 ---
 
-## Attack Scenarios
-
-Planned simulations include:
-
-* Network & SMB Enumeration
-* Credential Dumping
-* Pass-the-Hash Attacks
-* Privilege Escalation
-* Lateral Movement within AD
-
----
-
-## Detection & Monitoring
-
-* Endpoint log collection using Wazuh agents
-* Windows Event Log monitoring
-* Attack pattern detection
-* Alert generation and analysis
-
----
-
 ## 📂 Project Structure
 
 ```
@@ -96,17 +75,6 @@ diagrams/       → Architecture diagrams
 
 ---
 
-## Setup Instructions (High-Level)
-
-```bash
-az login
-terraform init
-terraform apply
-```
-
-Detailed steps are documented inside the `/docs` directory.
-
----
 
 ## Skills Demonstrated
 
@@ -125,7 +93,7 @@ Detailed steps are documented inside the `/docs` directory.
 * [x] Domain Controller Deployment
 * [x] Active Directory Deployment
 * [x] Domain Join (Workstation)
-* [ ] Attack Simulation
+* [x] Attack Simulation
 * [ ] Monitoring & Detection
 
 ---
