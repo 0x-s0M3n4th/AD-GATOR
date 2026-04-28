@@ -124,9 +124,23 @@ type C:\Users\$env:USERNAME\.ssh\kali_azure.pub
 ---
 
 ### Create terraform.tfvars
+_Go into `terraform` directory:_
+```bash
+# You can find this directory after cloning the repository
+cd terraform/
+
+# for linux users:
+nano terraform.tfvars
+
+# for windows users
+notepad terraform.tfvars
+
+```
+
+_Add the following variables and your respected values_
 
 ```hcl
-admin_password = "YOUR_PASSWORD"
+admin_password = "YOUR_PASSWORD" # example: 'StrongPassw0rd@123!'
 my_ip = "YOUR_PUBLIC_IP"
 kali_ssh_public_key = "YOUR_PUBLIC_KEY"
 ```
