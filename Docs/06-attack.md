@@ -23,6 +23,25 @@ This ensures logical separation between:
 * Attacker (`10.0.3.0/24`)
 
 ---
+## 1.0 Kali linux necessary variables declaration:
+
+```hcl
+variable "kali_name" {
+  default = "ad-gator-kali"
+}
+
+variable "kali_size" {
+  default = "Standard_D2s_v3"
+}
+
+variable "kali_admin_username" {
+  default = "kali"
+}
+
+variable "kali_ssh_public_key" {
+  description = "SSH public key for Kali"
+}
+```
 
 ## 1.1 Network Interface Configuration
 
@@ -31,7 +50,20 @@ This ensures logical separation between:
 * DNS explicitly set to Domain Controller
 
 ```hcl
-dns_servers = ["10.0.1.10"]
+resource "azurerm_network_interface" "kali_nic" {
+  name                = "${var.kali_name}-nic"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.attacker.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.0.3.10"
+    public_ip_address_id          = azurerm_public_ip.kali_pip.id
+  }
+  dns_servers = ["10.0.1.10"] # <- DC IP
+}
 ```
 _If you want to be more realistic just set the DNS server as `8.8.8.8` which is the google's DNS, so it won't be knowing anything about the internal architecture._
 
@@ -47,24 +79,46 @@ Active Directory attacks require:
 
 ## 1.2 Virtual Machine Configuration
 
-Key configuration:
-
 ```hcl
-size = "Standard_D2s_v3"
+resource "azurerm_linux_virtual_machine" "kali" {
+  name                = var.kali_name
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  size                = var.kali_size
+
+  admin_username = var.kali_admin_username
+
+  network_interface_ids = [
+    azurerm_network_interface.kali_nic.id
+  ]
+
+  admin_ssh_key {
+    username   = var.kali_admin_username
+    public_key = var.kali_ssh_public_key
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "kali-linux"
+    offer     = "kali"
+    sku       = "kali-2026-1"
+    version   = "latest"
+  }
+  plan {
+    name      = "kali-2026-1"
+    product   = "kali"
+    publisher = "kali-linux"
+  }
+}
 ```
-
-### Reason
-
-* 2 vCPU / 8 GB RAM
-* Sufficient for:
-
-  * Enumeration
-  * Lateral movement
-  * Lightweight C2 operations
 
 ---
 
-## 1.3 Marketplace Image Configuration
+## 1.3 Marketplace Image Configuration breakdown:
 
 Kali Linux is a Marketplace image and requires, so i needed to add some Microsft terms acceptance stuff:
 
@@ -104,7 +158,7 @@ VMMarketplaceInvalidInput
 
 ## Approach Used
 
-Accepted terms using Azure CLI:
+Accepted terms using Azure CLI(follow these steps properly to get the desired working result):
 
 ```bash
 az vm image terms accept \
@@ -185,7 +239,7 @@ ssh -i ~/.ssh/kali_azure kali@<PUBLIC_IP>
 
 ---
 
-## 4.1 Terminal Compatibility Issue
+## 4.1 Terminal Compatibility Issue, plus i wanted the kali login look:
 
 ### Problem
 
@@ -212,73 +266,20 @@ export TERM=xterm
 
 Permanent:
 
-```bash
-echo 'export TERM=xterm' >> ~/.zshrc
-```
-
----
-
-## 4.2 Broken Shell Configuration
-
-### Problem
-
-```text
-shopt: command not found
-```
-
----
-
-### Cause
-
-* `.bashrc` sourced in a `zsh` environment
-
----
-
-### Fix
-
-* Avoid using `.bashrc`
-* Use `.zshrc` instead
-
----
-
-## 4.3 Missing Kali Prompt (Minimal Shell)
-
-### Problem
-
-```text
-kali@kali:~$
-```
-
-Instead of:
-
-```text
-┌──(kali㉿kali)-[~]
-└─$
-```
-
----
-
-### Cause
-
-* Kali cloud image is minimal
-* Default `.zshrc` not fully configured
-
----
-
-### Fix
 
 ```bash
 cp /etc/skel/.zshrc ~/.zshrc
 echo 'export TERM=xterm' >> ~/.zshrc
+source ~/.zshrc
 ```
 
 ---
 
-## 4.4 `.zshrc` Not Loading Automatically
+## 4.2 `.zshrc` Not Loading Automatically after logging back in:
 
 ### Problem
 
-Prompt only appeared after:
+The kali look was only appearing after i was manually running the `.zshrc` file:
 
 ```bash
 source ~/.zshrc
@@ -294,7 +295,7 @@ Edit:
 nano ~/.zprofile
 ```
 
-Add:
+Add this line at the end of `.zprofile`:
 
 ```bash
 source ~/.zshrc
@@ -302,7 +303,7 @@ source ~/.zshrc
 
 ---
 
-## 4.5 Hostname Resolution Issue
+## 4.3 Hostname Resolution Issue
 
 ### Problem
 
