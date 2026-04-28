@@ -246,6 +246,77 @@ Domain: kurukshetra.local
 
 ---
 
+**IF YOU WANT TO VERIFY VIA GUI ACCESS THAT YOUR DOMAIN CONTROLLER AND WORKSTATION IS ALIVE OR NOT:**
+_Check the IPs beforehand_
+
+```bash
+az vm list-ip-addresses \
+  --resource-group ad-gator-rg \
+  --output table
+```
+
+```bash
+# Install xfrerdp3
+# For arch linux:
+sudo pacman -S freerdp
+
+# RDP into DC
+xfreerdp3 /v:<DC_PUBLIC_IP> \
+  /u:KURUKSHETRA\\krishna \
+  /p:'Password@123' \
+  /cert:ignore \
+  /dynamic-resolution
+
+# RDP into workstation
+xfreerdp3 /v:<WS_PUBLIC_IP> \
+  /u:KURUKSHETRA\\krishna \
+  /p:'Password@123' \
+  /cert:ignore \
+  /dynamic-resolution  
+
+# For debian - ubuntu/kali etc
+sudo apt update
+sudo apt install -y freerdp3-x11
+
+# RDP into DC
+xfreerdp3 /v:<DC_PUBLIC_IP> \
+  /u:KURUKSHETRA\\krishna \
+  /p:'Password@123' \
+  /cert:ignore \
+  /dynamic-resolution
+# RDP into workstation
+  xfreerdp3 /v:<WS_PUBLIC_IP> \
+  /u:KURUKSHETRA\\krishna \
+  /p:'Password@123' \
+  /cert:ignore \
+  /dynamic-resolution
+
+
+```
+
+_Windows installation of wfreerdp.exe_
+
+```powershell
+winget install FreeRDP.FreeRDP
+
+wfreerdp /version
+
+# RDP into DC
+wfreerdp /v:<DC_PUBLIC_IP> `
+  /u:KURUKSHETRA\krishna `
+  /p:Password@123 `
+  /cert:ignore `
+  /dynamic-resolution
+
+# RDP into workstation
+wfreerdp /v:<WS_PUBLIC_IP> `
+  /u:KURUKSHETRA\krishna `
+  /p:Password@123 `
+  /cert:ignore `
+  /dynamic-resolution
+```
+
+
 ## 12. Connect to Kali Machine
 
 ```bash
