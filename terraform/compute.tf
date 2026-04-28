@@ -132,3 +132,61 @@ resource "azurerm_windows_virtual_machine" "ws" {
     version   = "latest"
   }
 }
+
+# Kali Public IP allocation
+resource "azurerm_public_ip" "kali_pip" {
+  name                = "${var.kali_name}-pip"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+# Kali NIC:
+resource "azurerm_network_interface" "kali_nic" {
+  name                = "${var.kali_name}-nic"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.attacker.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.0.3.10"
+    public_ip_address_id          = azurerm_public_ip.kali_pip.id
+  }
+  dns_servers = ["10.0.1.10"] # <- DC IP
+}
+
+# Configuring the KALI vm:
+resource "azurerm_linux_virtual_machine" "kali" {
+  name                = var.kali_name
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  size                = var.kali_size
+
+  admin_username = var.kali_admin_username
+
+  network_interface_ids = [
+    azurerm_network_interface.kali_nic.id
+  ]
+
+  admin_ssh_key {
+    username   = var.kali_admin_username
+    public_key = var.kali_ssh_public_key
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "kali-linux"
+    offer     = "kali"
+    sku       = "kali-2023-4"
+    version   = "latest"
+  }
+}
+
