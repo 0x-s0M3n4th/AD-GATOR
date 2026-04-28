@@ -35,7 +35,7 @@ variable "kali_name" {
 }
 
 variable "kali_size" {
-  default = "Standard_B2s"
+  default = "Standard_D2s_v3"
 }
 
 variable "kali_admin_username" {
