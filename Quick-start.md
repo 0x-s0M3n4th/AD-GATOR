@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-1. Install Terraform
+1. Install Terraform -> arch linux installation
 ```bash
 sudo pacman -S terraform
 # verification
@@ -33,7 +33,7 @@ sudo apt install terraform -y
 ```
 
 
-2. Install Azure CLI
+2. Install Azure CLI -> Arch linux installation
 ```bash
 sudo pacman -S azure-cli
 # verification
@@ -53,8 +53,6 @@ az version
 
 3. Have an active Azure subscription
 
----
-
 ## 1. Authenticate with Azure
 
 Login to your Azure account:
@@ -71,6 +69,25 @@ az account show
 
 ---
 
+_When i was testing in windows, i faced issues like marketplace issue, linux users may also face the same issues like `Microsoft.Compute not registered` and `Auto provider registration disabled`, fix them before hand to not face the errors:
+```bash
+
+# step 1:
+az vm image terms accept \
+  --publisher kali-linux \
+  --offer kali \
+  --plan kali-2026-1
+
+
+# step 2:
+az provider register --namespace Microsoft.Compute
+az provider register --namespace Microsoft.Network
+az provider register --namespace Microsoft.Storage
+
+# step 3 : verification
+az provider show --namespace Microsoft.Compute --query "registrationState"
+```
+
 ## 2. Clone the Repository
 
 ```bash
@@ -85,16 +102,18 @@ _Before hand perform this commands to get your public ip:_
 curl ifconfig.me
 # copy the ipv4 value, make sure you are connected to a wifi, not mobile hotspot
 ```
+_Other way to check is that -> go to `what is my ip.com` -> copy the IPV4 value from there._
 
 ## 3. Configure Variables
 
 Create the `terraform.tfvars` file inside `/terraform` folder and provide:
 
 ```text
-- admin_password
-- public_ip (your machine’s IP for RDP/SSH access)
-- kali_ssh_public_key
+- admin_password = "YOUR_PREFERRED_PASSWORD"
+- my_ip = "YOUR_PUBLIC_IP"
+- kali_ssh_public_key = "PUBLIC_KEY_VALUE"
 ```
+
 
 ---
 
@@ -104,12 +123,15 @@ On your local machine:
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/kali_azure
+
+# for windows users:
+ssh-keygen -t ed25519 -f C:\Users\$env:USERNAME\.ssh\kali_azure
 ```
 
 Copy the public key:
 
 ```bash
-cat ~/.ssh/kali_azure.pub
+cat C:\Users\$env:USERNAME\.ssh\kali_azure.pub
 ```
 
 Paste it into:
@@ -170,7 +192,6 @@ az vm run-command invoke \
   --command-id RunPowerShellScript \
   --scripts "systeminfo | findstr /B /C:\"Domain\""
 ```
-
 Expected:
 
 ```text
@@ -186,6 +207,8 @@ az vm run-command invoke \
   --command-id RunPowerShellScript \
   --scripts "powershell -ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1"
 ```
+
+
 _Verification_
 
 ```bash
@@ -321,6 +344,9 @@ wfreerdp /v:<WS_PUBLIC_IP> `
 
 ```bash
 ssh -i ~/.ssh/kali_azure kali@<public-ip>
+
+# for windows users:
+ssh -i C:\Users\$env:USERNAME\.ssh\kali_azure kali@<KALI_PUBLIC_IP>
 ```
 
 ---
@@ -337,6 +363,9 @@ echo 'source ~/.zshrc' > ~/.zprofile
 ```
 
 ---
+
+# Add kali market place error solution
+
 
 ## 14. Install Attacker Toolset
 
