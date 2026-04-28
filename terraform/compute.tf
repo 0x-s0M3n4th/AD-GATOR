@@ -185,8 +185,13 @@ resource "azurerm_linux_virtual_machine" "kali" {
   source_image_reference {
     publisher = "kali-linux"
     offer     = "kali"
-    sku       = "kali-2023-4"
+    sku       = "kali-2026-1"
     version   = "latest"
+  }
+  plan {
+    name      = "kali-2026-1"
+    product   = "kali"
+    publisher = "kali-linux"
   }
 }
 
