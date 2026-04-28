@@ -284,10 +284,10 @@ wfreerdp /v:<WS_IP> /u:KURUKSHETRA\krishna /p:Password@123 /cert:ignore
 ### Debian / Ubuntu
 
 ```bash
-sudo apt install freerdp2-x11 -y
+sudo apt install freerdp3-x11 -y
 
-xfreerdp /v:<DC_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
-xfreerdp /v:<WS_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
+xfreerdp3 /v:<DC_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
+xfreerdp3 /v:<WS_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
 ```
 
 ---
@@ -297,8 +297,8 @@ xfreerdp /v:<WS_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
 ```bash
 sudo pacman -S freerdp
 
-xfreerdp /v:<DC_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
-xfreerdp /v:<WS_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
+xfreerdp3 /v:<DC_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
+xfreerdp3 /v:<WS_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
 ```
 
 ---
