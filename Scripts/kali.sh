@@ -1,11 +1,12 @@
 #!/bin/bash
 
+# Exit immediately if a command exits with a non-zero status
 set -e
 
 echo "[+] Updating system..."
 sudo apt update -y
 
-echo "[+] Installing base packages..."
+echo "[+] Installing base packages and Kali repository tools..."
 sudo apt install -y \
   nmap \
   smbclient \
@@ -14,22 +15,28 @@ sudo apt install -y \
   dnsutils \
   netcat-openbsd \
   proxychains4 \
-  xfreerdp \
+  freerdp3-x11 \
   git \
   curl \
   wget \
   unzip \
   python3-pip \
   python3-venv \
+  pipx \
   golang \
-  ruby-full
+  ruby-full \
+  chisel \
+  ligolo-ng \
+  jq
 
 echo "[+] Installing Metasploit..."
 sudo apt install -y metasploit-framework
 
 echo "[+] Setting up pipx..."
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
+# pipx is now installed via apt to avoid PEP 668 externally-managed errors
+pipx ensurepath
+
+# Ensure ~/.local/bin is in the PATH for the current script execution
 export PATH=$PATH:$HOME/.local/bin
 
 echo "[+] Creating tools directory..."
@@ -54,26 +61,25 @@ pipx install bloodhound
 # =========================
 
 echo "[+] Cloning enum4linux-ng..."
-git clone https://github.com/cddmp/enum4linux-ng.git
+# Added '|| true' or directory check to prevent set -e from killing the script if it already exists
+if [ ! -d "enum4linux-ng" ]; then
+  git clone https://github.com/cddmp/enum4linux-ng.git
+else
+  echo "[-] enum4linux-ng already exists, skipping..."
+fi
 
 echo "[+] Cloning SharpHound..."
-git clone https://github.com/BloodHoundAD/SharpHound.git
+if [ ! -d "SharpHound" ]; then
+  git clone https://github.com/BloodHoundAD/SharpHound.git
+else
+  echo "[-] SharpHound already exists, skipping..."
+fi
 
 # =========================
 # Binary tools
 # =========================
-
-echo "[+] Installing Chisel..."
-wget https://github.com/jpillora/chisel/releases/latest/download/chisel_linux_amd64.gz
-gunzip chisel_linux_amd64.gz
-chmod +x chisel_linux_amd64
-sudo mv chisel_linux_amd64 /usr/local/bin/chisel
-
-echo "[+] Installing Ligolo-ng..."
-wget https://github.com/nicocha30/ligolo-ng/releases/latest/download/ligolo-ng_linux_amd64.tar.gz
-tar -xzf ligolo-ng_linux_amd64.tar.gz
-chmod +x ligolo-ng
-sudo mv ligolo-ng /usr/local/bin/ligolo-ng
+# Note: Chisel and Ligolo-ng are now handled cleanly via apt in the block above.
+# They will be automatically available in your PATH.
 
 echo "[+] Installing Sliver C2..."
 curl https://sliver.sh/install | sudo bash
@@ -88,6 +94,19 @@ wget https://github.com/gentilkiwi/mimikatz/releases/latest/download/mimikatz_tr
   -O ~/tools/mimikatz/mimikatz.zip
 
 # =========================
+# Environment configuration
+# =========================
+
+echo "[+] Ensuring ~/.local/bin is in PATH for future sessions..."
+if ! grep -q "$HOME/.local/bin" ~/.zshrc; then
+  echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.zshrc
+fi
+
+if ! grep -q "$HOME/.local/bin" ~/.bashrc; then
+  echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.bashrc
+fi
+
+# =========================
 # Final
 # =========================
 
@@ -96,4 +115,6 @@ cd ~
 
 echo "[+] Setup complete!"
 echo "[+] Tools directory: ~/tools"
-echo "[+] Restart shell or run: source ~/.zshrc"
+echo "[+] Note: Chisel and Ligolo-ng were installed via apt and are ready to use."
+echo "[+] Restart your terminal or run: source ~/.zshrc":w
+
