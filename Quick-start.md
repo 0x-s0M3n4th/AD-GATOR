@@ -177,7 +177,33 @@ Expected:
 Domain: kurukshetra.local
 ```
 
----
+Run the post-config.ps1 for the GPO,OU,Users,groups etc setup:
+
+```bash
+az vm run-command invoke \
+  --resource-group ad-gator-rg \
+  --name ad-gator-dc \
+  --command-id RunPowerShellScript \
+  --scripts "powershell -ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1"
+```
+_Verification_
+
+```bash
+az vm run-command invoke \
+  --resource-group ad-gator-rg \
+  --name ad-gator-dc \
+  --command-id RunPowerShellScript \
+  --scripts "
+  systeminfo | findstr /B /C:\"Domain\"
+  Get-Service NTDS,certsvc
+  Import-Module ActiveDirectory
+  Get-ADUser -Filter * | Select Name
+  Get-ADOrganizationalUnit -Filter * | Select Name
+  Get-ADGroupMember 'Domain Admins'
+  Get-SmbShare
+  Get-GPO -All
+  "
+```
 
 ## 10. Domain Join Workstation
 
