@@ -28,3 +28,20 @@ variable "ws_name" {
 variable "ws_size" {
   default = "Standard_B2s"
 }
+
+# Kali variables
+variable "kali_name" {
+  default = "ad-gator-kali"
+}
+
+variable "kali_size" {
+  default = "Standard_B2s"
+}
+
+variable "kali_admin_username" {
+  default = "kali"
+}
+
+variable "kali_ssh_public_key" {
+  description = "SSH public key for Kali"
+}
