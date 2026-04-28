@@ -330,9 +330,10 @@ ssh -i ~/.ssh/kali_azure kali@<public-ip>
 Run:
 
 ```bash
-export TERM=xterm
 cp /etc/skel/.zshrc ~/.zshrc
 echo 'export TERM=xterm' >> ~/.zshrc
+source ~/.zshrc
+echo 'source ~/.zshrc' > ~/.zprofile
 ```
 
 ---
