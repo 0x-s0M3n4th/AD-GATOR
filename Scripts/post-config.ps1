@@ -21,5 +21,3 @@ powershell.exe -File "C:\ADSetup\shares.ps1"
 # GPOs last
 powershell.exe -File "C:\ADSetup\gpo.ps1"
 
-# Cleanup
-Unregister-ScheduledTask -TaskName "PostADConfig" -Confirm:$false

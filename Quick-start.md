@@ -193,18 +193,17 @@ az vm run-command invoke \
   --resource-group ad-gator-rg \
   --name ad-gator-dc \
   --command-id RunPowerShellScript \
-  --scripts "
-  systeminfo | findstr /B /C:\"Domain\"
+  --scripts '
+  systeminfo | findstr /B /C:"Domain"
   Get-Service NTDS,certsvc
   Import-Module ActiveDirectory
   Get-ADUser -Filter * | Select Name
   Get-ADOrganizationalUnit -Filter * | Select Name
-  Get-ADGroupMember 'Domain Admins'
+  Get-ADGroupMember "Domain Admins"
   Get-SmbShare
   Get-GPO -All
-  "
+  '
 ```
-
 ## 10. Domain Join Workstation
 
 Execute via Azure CLI:
