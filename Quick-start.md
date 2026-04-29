@@ -78,10 +78,19 @@ az provider show --namespace Microsoft.Compute --query "registrationState"
 
 ### Accept Kali Marketplace Terms (REQUIRED)
 
+#### Linux:
 ```bash
 az vm image terms accept \
   --publisher kali-linux \
   --offer kali \
+  --plan kali-2026-1
+```
+
+#### Windows:
+```powershell
+az vm image terms accept `
+  --publisher kali-linux `
+  --offer kali `
   --plan kali-2026-1
 ```
 
@@ -98,8 +107,13 @@ cd AD-GATOR
 
 ### Get Your Public IP
 
+#### Linux:
 ```bash
 curl ifconfig.me
+```
+#### Windows:
+```powershell
+(Invoke-RestMethod -Uri "https://ifconfig.me")
 ```
 _Or go to `https://whatismyipaddress.com/` to see your IPV4 address_
 
@@ -119,22 +133,26 @@ cat ~/.ssh/kali_azure.pub
 ```powershell
 ssh-keygen -t ed25519 -f C:\Users\$env:USERNAME\.ssh\kali_azure
 type C:\Users\$env:USERNAME\.ssh\kali_azure.pub
+# or
+Get-Content "$env:USERPROFILE\.ssh\kali_azure.pub"
 ```
 
 ---
 
 ### Create terraform.tfvars
 _Go into `terraform` directory:_
+
+#### Linux:
 ```bash
 # You can find this directory after cloning the repository
 cd terraform/
-
-# for linux users:
 nano terraform.tfvars
+```
 
-# for windows users
+#### Windows:
+```powershell
+cd terraform/
 notepad terraform.tfvars
-
 ```
 
 _Add the following variables and your respected values_
@@ -166,6 +184,8 @@ Wait **5–10 minutes** after apply completes.
 
 ### Verify Domain Controller
 
+#### Linux:
+
 ```bash
 az vm run-command invoke \
   --resource-group ad-gator-rg \
@@ -174,10 +194,20 @@ az vm run-command invoke \
   --scripts "systeminfo | findstr /B /C:\"Domain\""
 ```
 
+#### Windows:
+```powershell
+az vm run-command invoke `
+  --resource-group ad-gator-rg `
+  --name ad-gator-dc `
+  --command-id RunPowerShellScript `
+  --scripts 'systeminfo | findstr /B /C:"Domain"'
+```
+
 ---
 
 ### Run AD Configuration
 
+#### Linux:
 ```bash
 az vm run-command invoke \
   --resource-group ad-gator-rg \
@@ -186,10 +216,20 @@ az vm run-command invoke \
   --scripts "powershell -ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1"
 ```
 
+#### Windows:
+```powershell
+az vm run-command invoke `
+  --resource-group ad-gator-rg `
+  --name ad-gator-dc `
+  --command-id RunPowerShellScript `
+  --scripts 'powershell -ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1'
+```
+
 ---
 
 ### Join Workstation to Domain
 
+#### Linux:
 ```bash
 az vm run-command invoke \
   --resource-group ad-gator-rg \
@@ -201,11 +241,23 @@ az vm run-command invoke \
   Add-Computer -DomainName "kurukshetra.local" -Credential $cred -Force
   '
 ```
+#### Windows:
+```powershell
+az vm run-command invoke `
+  --resource-group ad-gator-rg `
+  --name ad-gator-ws `
+  --command-id RunPowerShellScript `
+  --scripts '
+  $pass = ConvertTo-SecureString "Password@123" -AsPlainText -Force
+  $cred = New-Object System.Management.Automation.PSCredential("KURUKSHETRA\krishna", $pass)
+  Add-Computer -DomainName "kurukshetra.local" -Credential $cred -Force
+  '
+```
 
 ---
 
 ### Restart Workstation
-
+#### Both linux and windows:
 ```bash
 az vm restart --resource-group ad-gator-rg --name ad-gator-ws
 ```
@@ -216,6 +268,7 @@ az vm restart --resource-group ad-gator-rg --name ad-gator-ws
 
 ### Connect via SSH
 
+#### Linux:
 ```bash
 ssh -i ~/.ssh/kali_azure kali@<KALI_PUBLIC_IP>
 ```
@@ -229,7 +282,7 @@ ssh -i C:\Users\$env:USERNAME\.ssh\kali_azure kali@<KALI_PUBLIC_IP>
 ---
 
 ### Fix Kali Environment (First Login)
-
+_Don't manually write the commands, copy paste them -> fix the terminal then you can run normal commands manually._
 ```bash
 cp /etc/skel/.zshrc ~/.zshrc
 echo 'export TERM=xterm' >> ~/.zshrc
@@ -278,6 +331,15 @@ winget install FreeRDP.FreeRDP
 wfreerdp /v:<DC_IP> /u:KURUKSHETRA\krishna /p:Password@123 /cert:ignore
 wfreerdp /v:<WS_IP> /u:KURUKSHETRA\krishna /p:Password@123 /cert:ignore
 ```
+_Native windows GUI_
+```powershell
+# This will open the native Windows GUI for Remote Desktop
+cmdkey /generic:TERMSRV/<DC_IP> /user:"KURUKSHETRA\krishna" /pass:"Password@123"
+mstsc /v:<DC_IP>
+
+cmdkey /generic:TERMSRV/<WS_IP> /user:"KURUKSHETRA\krishna" /pass:"Password@123"
+mstsc /v:<WS_IP>
+```
 
 ---
 
@@ -301,22 +363,4 @@ xfreerdp3 /v:<DC_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
 xfreerdp3 /v:<WS_IP> /u:KURUKSHETRA\\krishna /p:'Password@123' /cert:ignore
 ```
 
----
-
-## Final State
-
-```
-✔ Domain Controller deployed
-✔ Active Directory configured
-✔ Workstation domain joined
-✔ Kali attacker machine ready
-✔ Red Team tools installed
-```
-
----
-
-## Important Notes
-
-- DNS must point to Domain Controller (10.0.1.10)
-- Use domain users (krishna), not azureuser
-- Kali is CLI-based; GUI tools should run locally
+==THANKS FOR USING GUYS!==
