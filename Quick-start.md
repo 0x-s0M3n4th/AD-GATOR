@@ -216,6 +216,22 @@ az vm run-command invoke \
   --scripts "powershell -ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1"
 ```
 
+##### Verification - Linux:
+```bash
+  az vm run-command invoke \
+  --resource-group ad-gator-rg \
+  --name ad-gator-dc \
+  --command-id RunPowerShellScript \
+  --scripts '
+  Import-Module ActiveDirectory
+  Get-ADUser -Filter * | Select Name
+  Get-ADOrganizationalUnit -Filter * | Select Name
+  Get-ADGroupMember "Domain Admins"
+  Get-SmbShare
+  Get-GPO -All
+  '
+```
+
 #### Windows:
 ```powershell
 az vm run-command invoke `
@@ -224,6 +240,31 @@ az vm run-command invoke `
   --command-id RunPowerShellScript `
   --scripts 'powershell -ExecutionPolicy Bypass -File C:\ADSetup\post-config.ps1'
 ```
+##### Verification - windows:
+```powershell
+    az vm run-command invoke `
+  --resource-group ad-gator-rg `
+  --name ad-gator-dc `
+  --command-id RunPowerShellScript `
+  --scripts '
+  Import-Module ActiveDirectory
+  Get-ADUser -Filter * | Select Name
+  Get-ADOrganizationalUnit -Filter * | Select Name
+  Get-ADGroupMember "Domain Admins"
+  Get-SmbShare
+  Get-GPO -All
+  '
+```
+_When i was testing on windows the verification didn't work, it was returning nothing. To test the verification go to `portal.azure.com` -> login -> scroll down and look for `Resource Groups` option -> Click that -> Select `ad-gator-rg` -> Inside that select `ad-gator-dc` option -> On the left pane scroll down and expand the `Operations` option -> Click on `Run command` -> Select the first option on the table `RunPowerShellScript` -> and then paste the following command i am providing :_
+```powershell
+  Import-Module ActiveDirectory
+  Get-ADUser -Filter * | Select Name
+  Get-ADOrganizationalUnit -Filter * | Select Name
+  Get-ADGroupMember "Domain Admins"
+  Get-SmbShare
+  Get-GPO -All
+```
+_We can use the same path for different machines to run remote commands onto any machine without logging in directly._
 
 ---
 
@@ -253,13 +294,91 @@ az vm run-command invoke `
   Add-Computer -DomainName "kurukshetra.local" -Credential $cred -Force
   '
 ```
+_The domain joining script is not getting executed on windows for some reason, so go to your `azure portal` -> Navigate to the `ad-gator-rg` resource group -> Select `ad-gator-ws` -> Select the `Run command` option showed earlier -> Paste the following commands to join the domain:_
+
+```powershell
+$pass = ConvertTo-SecureString "Password@123" -AsPlainText -Force
+$cred = New-Object System.Management.Automation.PSCredential("KURUKSHETRA\krishna", $pass)
+Add-Computer -DomainName "kurukshetra.local" -Credential $cred -Force
+```
 
 ---
 
 ### Restart Workstation
-#### Both linux and windows:
+#### For linux only(On windows az cli the following command is not working):
 ```bash
 az vm restart --resource-group ad-gator-rg --name ad-gator-ws
+```
+
+##### Verification on linux(az cli):
+```bash
+    az vm run-command invoke \
+  --resource-group ad-gator-rg \
+  --name ad-gator-dc \
+  --command-id RunPowerShellScript `
+  --scripts "Get-ADComputer -Filter * | Select Name"
+```
+_It will return `ad-gator-dc` and `ad-gator-ws`_
+
+#### For windows :
+- Go to `azure portal` -> select the resource group -> select `ad-gator-ws`
+- You will see an `overview` page  -> Click on `restart` option
+
+##### Verification on windows(az cli):
+
+```powershell
+  az vm run-command invoke `
+  --resource-group ad-gator-rg `
+  --name ad-gator-dc `
+  --command-id RunPowerShellScript `
+  --scripts "Get-ADComputer -Filter * | Select Name"
+```
+_It will return `ad-gator-dc` and `ad-gator-ws`_
+
+### Moving our workstation to Indraprastha OU:
+
+#### On linux:
+```bash
+    az vm run-command invoke \
+  --resource-group ad-gator-rg \
+  --name ad-gator-dc \
+  --command-id RunPowerShellScript \
+  --scripts "
+  Import-Module ActiveDirectory
+  \$comp = Get-ADComputer ad-gator-ws
+  Move-ADObject -Identity \$comp.DistinguishedName \
+    -TargetPath 'OU=Workstations,OU=Indraprastha,DC=kurukshetra,DC=local'
+  "
+```
+##### Verification:
+```bash
+  az vm run-command invoke \
+  --resource-group ad-gator-rg \
+  --name ad-gator-dc \
+  --command-id RunPowerShellScript \
+  --scripts "
+  Import-Module ActiveDirectory
+  Get-ADComputer ad-gator-ws -Properties DistinguishedName |  Select Name, DistinguishedName
+  "
+```
+#### On windows:
+_az cli not working in this scenario too, we will utilize `azure portal's` `Run command option`_
+- Open `portal.azure.com` -> scroll down and look for `Resource Groups` option -> Click that -> Select `ad-gator-rg` -> Inside that select `ad-gator-dc` option -> On the left pane scroll down and expand the `Operations` option -> Click on `Run command` -> Select the first option on the table `RunPowerShellScript` -> and then paste the following command i am providing :_
+
+```powershell
+Import-Module ActiveDirectory
+
+$comp = Get-ADComputer -Identity "ad-gator-ws"
+
+Move-ADObject `
+  -Identity $comp.DistinguishedName `
+  -TargetPath "OU=Workstations,OU=Indraprastha,DC=kurukshetra,DC=local"
+```
+
+##### Verification on azure portal:
+```powershell
+Import-Module ActiveDirectory
+Get-ADComputer ad-gator-ws -Properties DistinguishedName |  Select Name, DistinguishedName
 ```
 
 ---
