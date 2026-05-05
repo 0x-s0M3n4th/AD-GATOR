@@ -442,15 +442,8 @@ az vm list-ip-addresses --resource-group ad-gator-rg -o table
 
 ---
 
-### Windows (wfreerdp)
+### Windows 
 
-```powershell
-winget install FreeRDP.FreeRDP
-
-wfreerdp /v:<DC_IP> /u:KURUKSHETRA\krishna /p:Password@123 /cert:ignore
-wfreerdp /v:<WS_IP> /u:KURUKSHETRA\krishna /p:Password@123 /cert:ignore
-```
-_Native windows GUI_
 ```powershell
 # This will open the native Windows GUI for Remote Desktop
 cmdkey /generic:TERMSRV/<DC_IP> /user:"KURUKSHETRA\krishna" /pass:"Password@123"
